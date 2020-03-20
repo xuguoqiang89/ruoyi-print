@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TbPrintTemplateMapper">
+    
+    <resultMap type="TbPrintTemplate" id="TbPrintTemplateResult">
+        <result property="id"    column="id"    />
+        <result property="type"    column="type"    />
+        <result property="projectId"    column="project_id"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="content"    column="content"    />
+        <result property="operator"    column="operator"    />
+        <result property="state"    column="state"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="printMode"    column="print_mode"    />
+    </resultMap>
+
+    <sql id="selectTbPrintTemplateVo">
+        select id, type, project_id, create_time, content, operator, state, update_time, remark, print_mode from tb_print_template
+    </sql>
+
+    <select id="selectTbPrintTemplateList" parameterType="TbPrintTemplate" resultMap="TbPrintTemplateResult">
+        <include refid="selectTbPrintTemplateVo"/>
+        <where>  
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="projectId != null "> and project_id = #{projectId}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+            <if test="operator != null  and operator != ''"> and operator = #{operator}</if>
+            <if test="state != null  and state != ''"> and state = #{state}</if>
+            <if test="printMode != null  and printMode != ''"> and print_mode = #{printMode}</if>
+        </where>
+    </select>
+    
+    <select id="selectTbPrintTemplateById" parameterType="Integer" resultMap="TbPrintTemplateResult">
+        <include refid="selectTbPrintTemplateVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectTbPrintTemplateListByType" parameterType="String" resultMap="TbPrintTemplateResult">
+        <include refid="selectTbPrintTemplateVo"/>
+        where type = #{orderType}
+        <if test="projectId != null  and projectId != ''"> and projectId = #{projectId}</if>
+    </select>
+        
+    <insert id="insertTbPrintTemplate" parameterType="TbPrintTemplate" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_print_template
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="type != null  and type != ''">type,</if>
+            <if test="projectId != null ">project_id,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="content != null  and content != ''">content,</if>
+            <if test="operator != null  and operator != ''">operator,</if>
+            <if test="state != null  and state != ''">state,</if>
+            <if test="updateTime != null ">update_time,</if>
+            <if test="remark != null  and remark != ''">remark,</if>
+            <if test="printMode != null  and printMode != ''">print_mode,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="type != null  and type != ''">#{type},</if>
+            <if test="projectId != null ">#{projectId},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="content != null  and content != ''">#{content},</if>
+            <if test="operator != null  and operator != ''">#{operator},</if>
+            <if test="state != null  and state != ''">#{state},</if>
+            <if test="updateTime != null ">#{updateTime},</if>
+            <if test="remark != null  and remark != ''">#{remark},</if>
+            <if test="printMode != null  and printMode != ''">#{printMode},</if>
+         </trim>
+    </insert>
+
+    <!--批量新增-->
+    <insert id="insertBatch" parameterType="TbPrintTemplate"  useGeneratedKeys="true" keyProperty="id">
+        insert into tb_print_template
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                                                                            type,
+                                                                project_id,
+                                                                create_time,
+                                                                content,
+                                                                operator,
+                                                                state,
+                                                                update_time,
+                                                                remark,
+                                                                print_mode,
+                                    </trim>
+        <foreach item="item" collection="list" separator="," >
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                                                                                                #{item.type},
+                                                                                #{item.projectId},
+                                                                                #{item.createTime},
+                                                                                #{item.content},
+                                                                                #{item.operator},
+                                                                                #{item.state},
+                                                                                #{item.updateTime},
+                                                                                #{item.remark},
+                                                                                #{item.printMode},
+                                                </trim>
+        </foreach>
+    </insert>
+
+    <update id="updateTbPrintTemplate" parameterType="TbPrintTemplate">
+        update tb_print_template
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="type != null  and type != ''">type = #{type},</if>
+            <if test="projectId != null ">project_id = #{projectId},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="content != null  and content != ''">content = #{content},</if>
+            <if test="operator != null  and operator != ''">operator = #{operator},</if>
+            <if test="state != null  and state != ''">state = #{state},</if>
+            <if test="updateTime != null ">update_time = #{updateTime},</if>
+            <if test="remark != null  and remark != ''">remark = #{remark},</if>
+            <if test="printMode != null  and printMode != ''">print_mode = #{printMode},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!--批量更新-->
+    <update id="updateBatch" parameterType="list">
+        update tb_print_template
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="name=case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="item.name!=null">
+                        when id=#{item.id} then #{item.name}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="title =case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="item.title!=null">
+                        when id=#{item.id} then #{item.title}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where
+        <foreach collection="list" separator="or" item="item" index="index">
+            id=#{item.id}
+        </foreach>
+    </update>
+
+    <delete id="deleteTbPrintTemplateById" parameterType="Integer">
+        delete from tb_print_template where id = #{id}
+    </delete>
+
+    <delete id="deleteTbPrintTemplateByIds" parameterType="String">
+        delete from tb_print_template where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

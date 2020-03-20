@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('打印模板选择列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+         <input id="id" th:value="${id}" type=""/>
+         <input id="projectId" th:value="${projectId}" type="hidden"/>
+         <input id="orderType" th:value="${orderType}" type="hidden"/>
+
+    </div>
+    <th:block th:include="include :: footer" />
+    <script th:inline="javascript">
+        var prefix = ctx + "system/print";
+
+        //得到查询的参数
+        function queryParams(params) {
+            var search = $.table.queryParams(params);
+            search.projectId = $("#projectId").val();
+            search.type = $("#orderType").val();
+            return search;
+        };
+        $(function() {
+            var id = $("#id").val();
+            var options = {
+                url: prefix + "/listByType",
+                printUrl:  "/system/print/print/"+id+"/{tempId}/11",
+                modalName: "打印模板",
+                showSearch:false,
+                queryParams: queryParams,
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field : 'id', 
+                    title : 'ID',
+                    visible: false
+                },
+                {
+                    field : 'remark',
+                    title : '模板说明'
+                },
+                {
+                    field : 'type', 
+                    title : '模板类别',
+                    formatter: function(value, row, index) {
+                        var res = '';
+                        if(value=='01'){
+                            res = '预订';
+                        }else if(value=='02'){
+                            res = '认购';
+                        }else if(value=='03'){
+                            res = '合同';
+                        }else if(value=='04'){
+                            res = '收款信息';
+                        }else if(value=='05'){
+                            res = '换房';
+                        }else if(value=='06'){
+                            res = '付款方式变更';
+                        }else if(value=='07'){
+                            res = '退单';
+                        }else if(value=='08'){
+                            res = '客户更名';
+                        }else if(value=='09'){
+                            res = '折扣报批';
+                        }else if(value=='10'){
+                            res = '认筹';
+                        }else if(value=='11'){
+                            res = '收据';
+                        }
+                        return res;
+                    }
+                },
+                {
+                    field : 'printMode',
+                    title : '打印方式',
+                    formatter: function(value, row, index) {
+                        var res = '';
+                        if(value=='01'){
+                            res = '<span class="label label-success">空白纸</span>';
+                        }else {
+                            res = '<span class="label label-warning">套打</span>';
+                        }
+                        return res;
+                    }
+                },
+                {
+                    field : 'state', 
+                    title : '状态',
+                    formatter: function(value, row, index) {
+                        var res = '';
+                        if(value=='0'){
+                            res = '<span class="label label-primary">启用</span>';
+                        }else {
+                            res = '<span class="label label-danger">停用</span>';
+                        }
+                        return res;
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+
+        /* 添加用户-选择用户-提交 */
+        function submitHandler() {
+            var rows = $.table.selectFirstColumns();
+            if (rows.length == 0) {
+                $.modal.alertWarning("请选择一条记录");
+                return;
+            }
+            if (rows.length > 1) {
+                $.modal.alertWarning("只能选择一条记录");
+                return;
+            }
+            var id = $("#id").val();
+            $.operate.print(id,rows[0],11);
+
+            setTimeout(function(){
+                $.modal.close();
+            }, 500);
+//            $.modal.close();
+        }
+    </script>
+</body>
+</html>

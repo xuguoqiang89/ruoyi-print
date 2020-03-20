@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org"
+	  xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<meta charset="utf-8">
+<head th:include="include :: header('数据库备份')"></head>
+
+<body class="gray-bg">
+<div class="container-div ui-layout-center">
+	<div class="row">
+
+		<div class="btn-group-sm" id="toolbar" role="group">
+			<a class="btn btn-success" onclick="backupDb()" shiro:hasPermission="system:backup:backup">
+				<i class="fa fa-tablet"></i> 备份数据库
+			</a>
+			<a class="btn btn-primary" onclick="refreshTb()">
+				<i class="fa fa-search"></i> 刷新列表
+			</a>
+		</div>
+		<div class="col-sm-12 select-table table-striped">
+			<table id="bootstrap-table" data-mobile-responsive="true"></table>
+		</div>
+	</div>
+</div>
+<div th:include="include :: footer"></div>
+
+<script th:inline="javascript">
+	var prefix=ctx+"system/backup";
+    $(function () {
+		loadFiles();
+       /* $.table.initHead({
+            columns:[
+                {field: 'rowNum', title: '行号', formatter: function(value, row, index) {
+                        return "第"+value+"行";
+                    }
+                },
+                {field: 'name', title: '名称'},
+                {field: 'time', title: '备份时间'},
+                {field: '操作', align:"left", title: '操作',formatter:function(v,row){
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs" href="javascript:void(0)" onclick="recovery(\'' + row.name + '\')"><i class="fa fa-edit"></i>还原</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="deleteFile(\'' + row.name + '\')"><i class="fa fa-remove"></i>删除</a>');
+                        return actions.join('');
+					}
+                }
+            ]
+        });
+		var datas=[[${files}]];
+        $.table.loadData(datas);*/
+    });
+
+	function loadFiles(){
+		 var options = {
+           url: prefix + "/files",
+           showSearch: false,
+           showRefresh: false,
+           showToggle: false,
+           showColumns: false,
+           pagination: false,
+           uniqueId: "rowNum",
+           height: 400,
+               columns: [{
+                   checkbox: true
+               },
+               {field: 'rowNum', title: '行号', formatter: function(value, row, index) {
+                       return "第"+value+"行";
+                   }
+               },
+               {field: 'name', title: '名称'},
+               {field: 'time', title: '备份时间'},
+               {field: '操作', align:"left", title: '操作',formatter:function(v,row){
+                       var actions = [];
+                       actions.push('<a class="btn btn-success btn-xs " href="javascript:void(0)" onclick="recovery(\'' + row.name + '\')"><i class="fa fa-edit"></i>还原</a> ');
+                       actions.push('<a class="btn btn-danger btn-xs" href="javascript:void(0)" onclick="deleteFile(\'' + row.name + '\')"><i class="fa fa-remove"></i>删除</a>');
+                       return actions.join('');
+
+                   }
+               }
+               ]
+       };
+       $.table.init(options);
+	}
+	function refreshTb(){
+		$.table.refresh();
+	}
+    function backupDb(){
+        $.modal.confirm("确认要执行数据库备份任务吗？", function() {
+            $.operate.post(prefix+"/backup",null,function(json){
+			});
+        })
+
+
+    }
+
+    function recovery(name){
+		$.modal.confirm("确认要执行还原数据库吗？", function() {
+			$.operate.post(prefix+"/recovery",{name:name});
+		})
+    }
+
+	function deleteFile(name){
+        $.modal.confirm("删除后文件无法找回，确认要删除该数据库备份文件吗？",function(){
+            $.operate.post(prefix+"/delete",{name:name});
+        });
+	}
+</script>
+</body>
+</html>

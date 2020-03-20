@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TbPrintTemplateContentMapper">
+    
+    <resultMap type="TbPrintTemplateContent" id="TbPrintTemplateContentResult">
+        <result property="id"    column="id"    />
+        <result property="tempId"    column="temp_id"    />
+        <result property="content"    column="content"    />
+    </resultMap>
+
+    <sql id="selectTbPrintTemplateContentVo">
+        select id, temp_id, content from tb_print_template_content
+    </sql>
+
+    <select id="selectTbPrintTemplateContentList" parameterType="TbPrintTemplateContent" resultMap="TbPrintTemplateContentResult">
+        <include refid="selectTbPrintTemplateContentVo"/>
+        <where>  
+            <if test="tempId != null "> and temp_id = #{tempId}</if>
+            <if test="content != null  and content != ''"> and content = #{content}</if>
+        </where>
+    </select>
+    
+    <select id="selectTbPrintTemplateContentById" parameterType="Long" resultMap="TbPrintTemplateContentResult">
+        <include refid="selectTbPrintTemplateContentVo"/>
+        where id = #{id}
+    </select>
+
+    <select id="selectTbPrintTemplateContentListByTempId" parameterType="Integer" resultMap="TbPrintTemplateContentResult">
+        <include refid="selectTbPrintTemplateContentVo"/>
+        where temp_id = #{tempId}
+    </select>
+        
+    <insert id="insertTbPrintTemplateContent" parameterType="TbPrintTemplateContent" useGeneratedKeys="true" keyProperty="id">
+        insert into tb_print_template_content
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="tempId != null ">temp_id,</if>
+            <if test="content != null  and content != ''">content,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="tempId != null ">#{tempId},</if>
+            <if test="content != null  and content != ''">#{content},</if>
+         </trim>
+    </insert>
+
+    <!--批量新增-->
+    <insert id="insertBatch" parameterType="TbPrintTemplateContent"  useGeneratedKeys="true" keyProperty="id">
+        insert into tb_print_template_content
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                                                                            temp_id,
+                                                                content,
+                                    </trim>
+        <foreach item="item" collection="list" separator="," >
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                                                                                                #{item.tempId},
+                                                                                #{item.content},
+                                                </trim>
+        </foreach>
+    </insert>
+
+    <update id="updateTbPrintTemplateContent" parameterType="TbPrintTemplateContent">
+        update tb_print_template_content
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="tempId != null ">temp_id = #{tempId},</if>
+            <if test="content != null  and content != ''">content = #{content},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!--批量更新-->
+    <update id="updateBatch" parameterType="list">
+        update tb_print_template_content
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="name=case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="item.name!=null">
+                        when id=#{item.id} then #{item.name}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="title =case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="item.title!=null">
+                        when id=#{item.id} then #{item.title}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where
+        <foreach collection="list" separator="or" item="item" index="index">
+            id=#{item.id}
+        </foreach>
+    </update>
+
+    <delete id="deleteTbPrintTemplateContentById" parameterType="Long">
+        delete from tb_print_template_content where id = #{id}
+    </delete>
+
+    <delete id="deleteTbPrintTemplateContentByTempId" parameterType="Integer">
+        delete from tb_print_template_content where temp_id = #{tempId}
+    </delete>
+
+    <delete id="deleteTbPrintTemplateContentByTempIds" parameterType="String">
+        delete from tb_print_template_content where temp_id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteTbPrintTemplateContentByIds" parameterType="String">
+        delete from tb_print_template_content where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

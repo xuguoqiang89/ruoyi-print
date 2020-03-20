@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TbReceiptsMapper">
+    
+    <resultMap type="TbReceipts" id="TbReceiptsResult">
+        <result property="id"    column="id"    />
+        <result property="companyName"    column="company_name"    />
+        <result property="receiptDate"    column="receipt_date"    />
+        <result property="receiptNo"    column="receipt_no"    />
+        <result property="receiptMode"    column="receipt_mode"    />
+        <result property="receiptRmb"    column="receipt_rmb"    />
+        <result property="receiptRmbUpp"    column="receipt_rmb_upp"    />
+        <result property="remarkType"    column="remark_type"    />
+        <result property="remark"    column="remark"    />
+        <result property="cashier"    column="cashier"    />
+        <result property="operator"    column="operator"    />
+    </resultMap>
+
+    <sql id="selectTbReceiptsVo">
+        select id, company_name, receipt_date, receipt_no, receipt_mode, receipt_rmb, receipt_rmb_upp, remark_type, remark, cashier, operator from tb_receipts
+    </sql>
+
+    <select id="selectTbReceiptsList" parameterType="TbReceipts" resultMap="TbReceiptsResult">
+        <include refid="selectTbReceiptsVo"/>
+        <where>  
+            <if test="companyName != null  and companyName != ''"> and company_name like concat('%', #{companyName}, '%')</if>
+            <if test="receiptDate != null "> and receipt_date = #{receiptDate}</if>
+            <if test="receiptNo != null  and receiptNo != ''"> and receipt_no = #{receiptNo}</if>
+            <if test="receiptMode != null  and receiptMode != ''"> and receipt_mode = #{receiptMode}</if>
+            <if test="receiptRmb != null "> and receipt_rmb = #{receiptRmb}</if>
+            <if test="receiptRmbUpp != null  and receiptRmbUpp != ''"> and receipt_rmb_upp = #{receiptRmbUpp}</if>
+            <if test="remarkType != null  and remarkType != ''"> and remark_type = #{remarkType}</if>
+            <if test="cashier != null  and cashier != ''"> and cashier = #{cashier}</if>
+            <if test="operator != null  and operator != ''"> and operator = #{operator}</if>
+        </where>
+    </select>
+    
+    <select id="selectTbReceiptsById" parameterType="Long" resultMap="TbReceiptsResult">
+        <include refid="selectTbReceiptsVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTbReceipts" parameterType="TbReceipts">
+        insert into tb_receipts
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null ">id,</if>
+            <if test="companyName != null  and companyName != ''">company_name,</if>
+            <if test="receiptDate != null ">receipt_date,</if>
+            <if test="receiptNo != null  and receiptNo != ''">receipt_no,</if>
+            <if test="receiptMode != null  and receiptMode != ''">receipt_mode,</if>
+            <if test="receiptRmb != null ">receipt_rmb,</if>
+            <if test="receiptRmbUpp != null  and receiptRmbUpp != ''">receipt_rmb_upp,</if>
+            <if test="remarkType != null  and remarkType != ''">remark_type,</if>
+            <if test="remark != null  and remark != ''">remark,</if>
+            <if test="cashier != null  and cashier != ''">cashier,</if>
+            <if test="operator != null  and operator != ''">operator,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null ">#{id},</if>
+            <if test="companyName != null  and companyName != ''">#{companyName},</if>
+            <if test="receiptDate != null ">#{receiptDate},</if>
+            <if test="receiptNo != null  and receiptNo != ''">#{receiptNo},</if>
+            <if test="receiptMode != null  and receiptMode != ''">#{receiptMode},</if>
+            <if test="receiptRmb != null ">#{receiptRmb},</if>
+            <if test="receiptRmbUpp != null  and receiptRmbUpp != ''">#{receiptRmbUpp},</if>
+            <if test="remarkType != null  and remarkType != ''">#{remarkType},</if>
+            <if test="remark != null  and remark != ''">#{remark},</if>
+            <if test="cashier != null  and cashier != ''">#{cashier},</if>
+            <if test="operator != null  and operator != ''">#{operator},</if>
+         </trim>
+    </insert>
+
+    <!--批量新增-->
+    <insert id="insertBatch" parameterType="TbReceipts" >
+        insert into tb_receipts
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+                                                id,
+                                                                company_name,
+                                                                receipt_date,
+                                                                receipt_no,
+                                                                receipt_mode,
+                                                                receipt_rmb,
+                                                                receipt_rmb_upp,
+                                                                remark_type,
+                                                                remark,
+                                                                cashier,
+                                                                operator,
+                                    </trim>
+        <foreach item="item" collection="list" separator="," >
+            <trim prefix="values (" suffix=")" suffixOverrides=",">
+                                                            #{item.id},
+                                                                                #{item.companyName},
+                                                                                #{item.receiptDate},
+                                                                                #{item.receiptNo},
+                                                                                #{item.receiptMode},
+                                                                                #{item.receiptRmb},
+                                                                                #{item.receiptRmbUpp},
+                                                                                #{item.remarkType},
+                                                                                #{item.remark},
+                                                                                #{item.cashier},
+                                                                                #{item.operator},
+                                                </trim>
+        </foreach>
+    </insert>
+
+    <update id="updateTbReceipts" parameterType="TbReceipts">
+        update tb_receipts
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="companyName != null  and companyName != ''">company_name = #{companyName},</if>
+            <if test="receiptDate != null ">receipt_date = #{receiptDate},</if>
+            <if test="receiptNo != null  and receiptNo != ''">receipt_no = #{receiptNo},</if>
+            <if test="receiptMode != null  and receiptMode != ''">receipt_mode = #{receiptMode},</if>
+            <if test="receiptRmb != null ">receipt_rmb = #{receiptRmb},</if>
+            <if test="receiptRmbUpp != null  and receiptRmbUpp != ''">receipt_rmb_upp = #{receiptRmbUpp},</if>
+            <if test="remarkType != null  and remarkType != ''">remark_type = #{remarkType},</if>
+            <if test="remark != null  and remark != ''">remark = #{remark},</if>
+            <if test="cashier != null  and cashier != ''">cashier = #{cashier},</if>
+            <if test="operator != null  and operator != ''">operator = #{operator},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <!--批量更新-->
+    <update id="updateBatch" parameterType="list">
+        update tb_receipts
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="name=case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="item.name!=null">
+                        when id=#{item.id} then #{item.name}
+                    </if>
+                </foreach>
+            </trim>
+            <trim prefix="title =case" suffix="end,">
+                <foreach collection="list" item="item" index="index">
+                    <if test="item.title!=null">
+                        when id=#{item.id} then #{item.title}
+                    </if>
+                </foreach>
+            </trim>
+        </trim>
+        where
+        <foreach collection="list" separator="or" item="item" index="index">
+            id=#{item.id}
+        </foreach>
+    </update>
+
+    <delete id="deleteTbReceiptsById" parameterType="Long">
+        delete from tb_receipts where id = #{id}
+    </delete>
+
+    <delete id="deleteTbReceiptsByIds" parameterType="String">
+        delete from tb_receipts where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

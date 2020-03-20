@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('打印预览')" />
+</head>
+<body class="gray-bg">
+<div class="container-div" id="show_content">
+
+</div>
+<input id="print_type" th:value="${tbPrintTemplate.type}" type="hidden"/>
+<div id="print_data" style="display: none;"></div>
+<div id="template_content" th:value="${tbPrintTemplate.content}"></div>
+<th:block th:include="include :: footer" />
+<th:block th:include="include :: lodopFuncs-js" />
+<script th:inline="javascript">
+    $(function(){
+        var content = $("#template_content").attr("value");
+        $("#show_content").html(content);
+
+        setTimeout(function(){
+            preview();
+            $.modal.close();//自动关闭窗体
+        }, 500);
+    });
+
+    var LODOP; //0.声明为全局变量
+    var print_mode = $("#print_type").val();
+    function CreatePrintPage() {
+        LODOP = getLodop();//1. 获取 LODOP
+        if(print_mode=='02'){
+            //套打
+            eval(document.getElementById("show_content").innerHTML);
+        }else {
+            //空白纸
+            var strBodyStyle="";
+            var strFormHtml=strBodyStyle+"<body>"+$("#show_content").html()+"</body>";
+            LODOP.ADD_PRINT_HTML(0,0,"210mm","297mm",strFormHtml);//宽122mm 高62mm
+        }
+    };
+
+    function preview() {
+        CreatePrintPage();
+        LODOP.PREVIEW();
+    }
+
+</script>
+</body>
+</html>

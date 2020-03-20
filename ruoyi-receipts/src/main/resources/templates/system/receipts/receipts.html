@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('收据管理列表')" />
+</head>
+<body class="gray-bg">
+     <div class="container-div">
+        <div class="row">
+            <div class="col-sm-12 search-collapse">
+                <form id="formId">
+                    <div class="select-list">
+                        <ul>
+                            <li>
+                                <p>交款单位(或姓名)：</p>
+                                <input type="text" name="companyName"/>
+                            </li>
+                            <li class="select-time">
+                                <p>收据日期：</p>
+                                <input type="text" class="time-input" id="startTime" placeholder="开始时间" name="params[beginReceiptDate]"/>
+                                <span>-</span>
+                                <input type="text" class="time-input" id="endTime" placeholder="结束时间" name="params[endReceiptDate]"/>
+                            </li>
+                            <li>
+                                <p>收据号：</p>
+                                <input type="text" name="receiptNo"/>
+                            </li>
+                            <li>
+                                <p>收款方式：</p>
+                                <select name="receiptMode" th:with="type=${@dict.getType('receipt_type')}">
+                                    <option value="">所有</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <p>备注事项：</p>
+                                <select name="remarkType" th:with="type=${@dict.getType('receipt_remark_type')}">
+                                    <option value="">所有</option>
+                                    <option th:each="dict : ${type}" th:text="${dict.dictLabel}" th:value="${dict.dictValue}"></option>
+                                </select>
+                            </li>
+                            <li>
+                                <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i class="fa fa-search"></i>&nbsp;搜索</a>
+                                <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i class="fa fa-refresh"></i>&nbsp;重置</a>
+                            </li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+
+            <div class="btn-group-sm" id="toolbar" role="group">
+                <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="system:receipts:add">
+                    <i class="fa fa-plus"></i> 添加
+                </a>
+                <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="system:receipts:edit">
+                    <i class="fa fa-edit"></i> 修改
+                </a>
+                <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()" shiro:hasPermission="system:receipts:remove">
+                    <i class="fa fa-remove"></i> 删除
+                </a>
+                <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="system:receipts:export">
+                    <i class="fa fa-download"></i> 导出
+                 </a>
+                <a class="btn btn-success single disabled" onclick="$.operate.print('','',11)" shiro:hasPermission="system:receipts:print">
+                    <i class="fa fa-print"></i> 打印
+                </a>
+            </div>
+            <div class="col-sm-12 select-table table-striped">
+                <table id="bootstrap-table"></table>
+            </div>
+        </div>
+         <input id="id" type="text"/>
+         <input id="orderType" type="text"/>
+         <input id="projectId" type="text"/>
+    </div>
+    <th:block th:include="include :: footer" />
+     <th:block th:include="include :: select2-js" />
+    <script th:inline="javascript">
+        var editFlag = [[${@permission.hasPermi('system:receipts:edit')}]];
+        var removeFlag = [[${@permission.hasPermi('system:receipts:remove')}]];
+        var printFlag = [[${@permission.hasPermi('system:receipts:print')}]];
+        var userList = [[${@user.getAllUsers()}]];
+        var typeList = [[${@dict.getType('receipt_type')}]];
+        var remarkTypeList = [[${@dict.getType('receipt_remark_type')}]];
+        var prefix = ctx + "system/receipts";
+
+        $(function() {
+            var options = {
+                url: prefix + "/list",
+                createUrl: prefix + "/add",
+                updateUrl: prefix + "/edit/{id}",
+                removeUrl: prefix + "/remove",
+                exportUrl: prefix + "/export",
+                printUrl:  "/system/print/print/{id}/0/11",
+                modalName: "收据管理",
+                columns: [{
+                    checkbox: true
+                },
+                {
+                    field : 'id', 
+                    title : '经办人',
+                    visible: false
+                },
+                {
+                    field : 'companyName', 
+                    title : '交款单位(或姓名)'
+                },
+                {
+                    field : 'receiptDate', 
+                    title : '收据日期'
+                },
+                {
+                    field : 'receiptNo', 
+                    title : '收据号'
+                },
+                {
+                    field : 'receiptMode', 
+                    title : '收款方式',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(typeList, value);
+                    }
+                },
+                {
+                    field : 'receiptRmb', 
+                    title : '人民币'
+                },
+                {
+                    field : 'receiptRmbUpp', 
+                    title : '人民币大写'
+                },
+                {
+                    field : 'remarkType', 
+                    title : '备注事项',
+                    formatter: function(value, row, index) {
+                        return $.table.selectDictLabel(remarkTypeList, value);
+                    }
+                },
+                {
+                    field : 'remark', 
+                    title : '备注'
+                },
+                {
+                    field : 'cashier', 
+                    title : '出纳'
+                },
+                {
+                    field : 'operator', 
+                    title : '经办人',
+                    formatter: function(value, row, index) {
+                        return $.table.selectUserLabel(userList, value);
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function(value, row, index) {
+                        var actions = [];
+                        actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + printFlag + '" href="javascript:void(0)" onclick="$.operate.print(\'' + row.id + '\',\'\',11)"><i class="fa fa-print"></i>打印</a>');
+                        return actions.join('');
+                    }
+                }]
+            };
+            $.table.init(options);
+        });
+    </script>
+</body>
+</html>

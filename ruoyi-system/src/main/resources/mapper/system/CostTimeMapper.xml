@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.CostTimeMapper">
+    
+    <resultMap type="CostTime" id="CostTimeResult">
+        <result property="id"    column="id"    />
+        <result property="className"    column="class_name"    />
+        <result property="methodName"    column="method_name"    />
+        <result property="spendTime"    column="spend_time"    />
+    </resultMap>
+	
+	<sql id="selectCostTimeVo">
+        select id, class_name, method_name, spend_time from sys_cost_time
+    </sql>
+	
+    <select id="selectCostTimeList" parameterType="CostTime" resultMap="CostTimeResult">
+        <include refid="selectCostTimeVo"/>
+        <where>  
+            <if test="id != null "> and id = #{id}</if>
+             <if test="className != null  and className != '' "> and class_name = #{className}</if>
+             <if test="methodName != null  and methodName != '' "> and method_name = #{methodName}</if>
+             <if test="spendTime != null "> and spend_time = #{spendTime}</if>
+         </where>
+        order by spend_time desc
+    </select>
+    
+    <select id="selectCostTimeById" parameterType="Integer" resultMap="CostTimeResult">
+        <include refid="selectCostTimeVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertCostTime" parameterType="CostTime">
+        insert into sys_cost_time
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null  ">id,</if>
+			<if test="className != null  and className != ''  ">class_name,</if>
+			<if test="methodName != null  and methodName != ''  ">method_name,</if>
+			<if test="spendTime != null  ">spend_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null  ">#{id},</if>
+			<if test="className != null  and className != ''  ">#{className},</if>
+			<if test="methodName != null  and methodName != ''  ">#{methodName},</if>
+			<if test="spendTime != null  ">#{spendTime},</if>
+         </trim>
+    </insert>
+	 
+    <update id="updateCostTime" parameterType="CostTime">
+        update sys_cost_time
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="className != null  and className != ''  ">class_name = #{className},</if>
+            <if test="methodName != null  and methodName != ''  ">method_name = #{methodName},</if>
+            <if test="spendTime != null  ">spend_time = #{spendTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+	<delete id="deleteCostTimeById" parameterType="Integer">
+        delete from sys_cost_time where id = #{id}
+    </delete>
+	
+    <delete id="deleteCostTimeByIds" parameterType="String">
+        delete from sys_cost_time where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

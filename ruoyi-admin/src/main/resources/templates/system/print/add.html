@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+    <th:block th:include="include :: header('新增打印模板')" />
+    <th:block th:include="include :: summernote-css" />
+</head>
+<body class="white-bg">
+    <div class="wrapper wrapper-content animated fadeInRight ibox-content" style="width: 60%;float: left;">
+        <div class="row" style="width: 70%;text-align: center;padding-bottom: 28px;margin-top: 15px;">
+            <button class="btn btn-success btn-xs" type="button" id="previewBtn" onclick="preview();">打印预览</button>
+        </div>
+        <form class="form-horizontal m" id="form-template-add">
+            <table id="temp_table" style="width: 100%;">
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label is-required">模板名称</label>
+                        <div class="col-sm-4">
+                            <input id="remark" name="remark" class="form-control" type="text" required autocomplete="off">
+                        </div>
+
+                        <label class="col-sm-2 control-label is-required">打印方式</label>
+                        <div class="col-sm-4">
+                            <select name="printMode" class="form-control m-b" id="printMode">
+                                <option value="01">空白纸打印</option>
+                                <option value="02">套打</option>
+                            </select>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group">
+                        <label class="col-sm-2 control-label is-required">模板类别</label>
+                        <div class="col-sm-4">
+                            <select name="type" class="form-control m-b" id="print_type" required>
+                                <option value="">请选择</option>
+                                <option value="10">认筹</option>
+                                <option value="01">预订</option>
+                                <option value="02">认购</option>
+                                <option value="03">合同</option>
+                                <option value="04">收款信息</option>
+                                <option value="05">换房</option>
+                                <option value="06">付款方式变更</option>
+                                <option value="07">退单</option>
+                                <option value="08">客户更名</option>
+                                <option value="09">折扣报批</option>
+                                <option value="11">收据</option>
+                            </select>
+                        </div>
+                        <label class="col-sm-2 control-label">状态</label>
+                        <div class="col-sm-4">
+                            <select id="state" name="state" class="form-control m-b">
+                                <option value="0">启用</option>
+                                <option value="1">停用</option>
+                            </select>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group" id="print_kbz">
+                        <label class="col-sm-2 control-label">模板内容</label>
+                        <div class="col-sm-10">
+                            <!--<textarea type="text" name="content" class="form-control" placeholder="模板内容" rows="15"></textarea>-->
+                            <input id="content" name="content" type="hidden">
+                            <div class="summernote"></div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div class="form-group" name="print_taoda" style="display: none;">
+                        <label class="col-sm-2 control-label">模板类别</label>
+                        <div class="col-sm-10">
+                            <textarea type="text" id="content1" name="taoda_content" class="form-control" placeholder="模板内容" rows="10"></textarea>
+                            <div style="text-align: right;">
+                                <button class="btn btn-primary btn-xs" type="button" onclick="design1('content1');">模板设计</button>
+                                <button class="btn btn-success btn-xs" type="button" onclick="preview1('content1');">模板预览</button>
+                                <button class="btn btn-warning btn-xs" type="button" onclick="addNextPage();">添加下一页</button>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            </table>
+            <input id="projectId" name="projectId" class="form-control" type="hidden" value="0" autocomplete="off">
+            <input id="contentStrList" name="contentStrList" class="form-control" type="hidden" autocomplete="off">
+        </form>
+    </div>
+    <div id="print_data" style="float:right; width: 28%;height: 96%;margin-top: 10px;">
+
+    </div>
+    <th:block th:include="include :: footer" />
+    <th:block th:include="include :: summernote-js" />
+    <th:block th:include="include :: lodopFuncs-js" />
+    <script type="text/javascript">
+        var prefix = ctx + "system/print"
+        $("#form-template-add").validate({
+            focusCleanup: true
+        });
+
+        function submitHandler() {
+            if ($.validate.form()) {
+                var sHTML = $('.summernote').summernote('code');
+                $("#content").val(sHTML);
+                var printMode = document.getElementById("printMode").value;
+                var content = sHTML;
+
+                var projectId = $("#projectId").val();
+                var contentArray = new Array();
+                var contents = document.getElementsByName("taoda_content");
+                for(var i=0;i<contents.length;i++){
+                    var content1 = contents[i].value;
+                    if(content1!=null && content1!=''){
+                        contentArray.push(content1);
+                    }
+                }
+                if(printMode=="02" && contentArray.length==0){
+                    $.modal.alertWarning("请进行打印模板设计");
+                    return false;
+                }
+                var remark = document.getElementById("remark").value;
+                var printMode = document.getElementById("printMode").value;
+                var printType = document.getElementById("print_type").value;
+                var state = document.getElementById("state").value;
+                var id = "";
+
+                if(contentArray.length==0){
+                    contentArray = [];
+                }
+                var dataArray = new Array();
+
+                var params="{id:'"+id+"',content:'"+(content)+"',projectId:'"+projectId+"',remark:'"+remark+"',printMode:'"+printMode+"',printType:'"+printType+"',state:'"+state+"'}";
+                dataArray.push(params);
+                dataArray.push(contentArray);
+                var url = prefix + "/add";
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    contentType: "application/json;charset=UTF-8",
+                    data: JSON.stringify(dataArray),
+                    success: function(r){
+                        console.log(r);
+                        if(r.code == 0){
+                            console.log(1);
+                            parent.location.href= prefix;
+                        }else{
+                            layer.alert(content, {
+                                icon: $.modal.icon("error"),
+                                title: "错误提示",
+                                btn: ['确认'],
+                                btnclass: ['btn btn-primary'],
+                            });
+                        }
+                    }
+                });
+//                $.operate.save(prefix + "/add", $('#form-template-add').serialize());
+            }
+        }
+
+        $('.summernote').summernote({
+            placeholder: '模板代码',
+            height : 260,
+            lang : 'zh-CN',
+            followingToolbar: false,
+            callbacks: {
+                onImageUpload: function (files) {
+                    sendFile(files[0], this);
+                }
+            }
+        });
+
+        var content_index = 0;
+//        var uEditor = UE.getEditor('editor');
+
+        var LODOP; //0.声明为全局变量
+        function CreatePrintPage() {
+            LODOP = getLodop();//1. 获取 LODOP
+            var print_mode = document.getElementById("printMode").value;
+            if(print_mode=='02'){
+                //套打
+                var contents = document.getElementsByName("taoda_content");
+                var tr_id=1;
+                var td_content = '';
+                for(var i=0;i<contents.length;i++){
+                    var content = contents[i].value;
+                    console.log(content);
+                    if(content!=null && content!=''){
+                        //最后一页不需要在添加分页方法；除了第一页，其他页去掉页面初始化的方法
+                        if(tr_id>1){
+                            content = content.substring(content.indexOf("LODOP.ADD_PRINT"),content.length);
+                            if(tr_id==contents.length){
+                                td_content += content;
+                            }else {
+                                td_content += content+"LODOP.NewPage();";
+                            }
+
+                        }else {
+                            td_content += content+"LODOP.NewPage();";
+                        }
+                        tr_id++;
+                    }
+                }
+                eval(td_content);
+            }else {
+                //空白纸
+                var td_content = $('.summernote').summernote('code');
+                var strFormHtml="<body>"+td_content+"</body>";
+                LODOP.ADD_PRINT_HTML(0,0,"210mm","297mm",strFormHtml);//宽122mm 高62mm
+            }
+
+        };
+
+        function preview() {
+            CreatePrintPage();
+            LODOP.PREVIEW();
+        }
+
+        $("#print_type").change(function(){
+            initTempData();
+        });
+
+        $("#printMode").change(function(res){
+            var printMode = $("#printMode").val();
+            if(printMode=='01'){
+                //空白纸
+                document.getElementById("print_kbz").style.display = "";
+                var tds = document.getElementsByName("print_taoda");
+                for(var i=0;i<tds.length;i++){
+                    tds[i].style.display = "none";
+                }
+
+            }else if(printMode=='02'){
+                //套打
+                document.getElementById("print_kbz").style.display = "none";
+                var tds = document.getElementsByName("print_taoda");
+                for(var i=0;i<tds.length;i++){
+                    tds[i].style.display = "";
+                }
+            }
+        });
+
+        function CreatePrintPage1(contentId) {
+            LODOP = getLodop();//1. 获取 LODOP
+            eval(document.getElementById(contentId).innerHTML);
+        };
+
+        function design1(contentId) {
+            CreatePrintPage1(contentId);
+            LODOP.PRINT_DESIGN();
+            LODOP.SET_PRINT_MODE("PRINT_SETUP_PROGRAM",true);
+            if (LODOP.CVERSION) CLODOP.On_Return=function(TaskID,Value){document.getElementById(contentId).value=Value;};
+            document.getElementById(contentId).value=LODOP.PRINT_SETUP();
+        }
+
+        function preview1(contentId) {
+            CreatePrintPage1(contentId);
+            LODOP.PREVIEW();
+        }
+        var page = 2;
+        function addNextPage(){
+            var t = document.getElementById("temp_table");
+            var rows = t.rows;
+
+            var newRow = t.insertRow();
+            var index = rows.length-2;
+            var td = newRow.insertCell();
+            td.style.textAlign = "center";
+            td.style.verticalAlign="middle";
+            td.className = "label_style";
+            var td_html = '<div class="form-group" name="print_taoda">'+
+            '			<label class="col-sm-2 control-label">模板内容(页'+page+'):</label>'+
+            '			<div class="col-sm-10">'+
+            '				<textarea id="content'+page+'" name="taoda_content" class="form-control" rows="10"></textarea>'+
+            '				<div style="text-align: right;">'+
+            '					<button class="btn btn-primary btn-xs" type="button" onclick="design1(\'content'+page+'\');">模板设计</button>'+
+            '					<button class="btn btn-success btn-xs" type="button" onclick="preview1(\'content'+page+'\');">模板预览</button>'+
+            '					<button class="btn btn-warning btn-xs" type="button" onclick="addNextPage(this);">添加下一页</button>'+
+            '				</div>'+
+            '			</div>'+
+            '		</div>';
+            td.innerHTML = td_html;
+            page++;
+        }
+    </script>
+</body>
+</html>

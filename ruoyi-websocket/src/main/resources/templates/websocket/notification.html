@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" >
+<head>
+	<th:block th:include="include :: header('websocket消息测试')" />
+</head>
+<body class="gray-bg" style="font: 14px Helvetica Neue, Helvetica, PingFang SC, 微软雅黑, Tahoma, Arial, sans-serif !important;">
+    <section class="section-content">
+    <div class="row">
+        <div class="col-xs-12">
+            <div class="ibox float-e-margins">
+                <div class="ibox-content" style="border-style:none;">
+                    <div class="nav-tabs-custom">
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a href="#tab-broadcast" data-toggle="tab" aria-expanded="true">消息群发</a></li>
+
+                            <li class="pull-right header">
+								<i class="fa fa-code"></i> websocket消息测试
+							</li>
+                        </ul>
+
+
+							<div class="tab-content">
+								<!-- 消息群发 -->
+								<div class="tab-pane active" id="tab-broadcast">
+									<form id="form-broadcast" class="form-horizontal" >
+
+									<div class="row">
+										<div class="col-sm-12">
+											<div class="form-group">
+												<label class="col-xs-2 control-label">消息：</label>
+												<div class="col-xs-10">
+													<textarea name="msg" maxlength="500" class="form-control" rows="3" required></textarea>
+												</div>
+											</div>
+										</div>
+									</div>
+									<div class="box-footer">
+										<div class="col-sm-offset-5 col-sm-6">
+											<button type="button" class="btn btn-sm btn-primary" onclick="broadcast()"><i class="fa fa-check"></i>消息群发</button>&nbsp;
+										</div>
+									</div>
+									</form>
+								</div>
+
+
+							</div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+	</section>
+    <th:block th:include="include :: footer" />
+    <script type="text/javascript">
+		var url=ctx+"notice"
+	    function broadcast() {
+	        if ($.validate.form("form-broadcast")) {
+	        	$.operate.saveModal(url, $("#form-broadcast").serializeArray(),function(){
+                });
+	        }
+	    }
+
+		$(function() {
+
+		});
+    </script>
+</body>
+</html>
+
