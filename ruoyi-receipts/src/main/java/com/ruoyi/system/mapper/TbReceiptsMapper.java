@@ -1,6 +1,8 @@
 package com.ruoyi.system.mapper;
 
 import com.ruoyi.system.domain.TbReceipts;
+import org.apache.ibatis.annotations.Param;
+
 import java.util.List;
 
 /**
@@ -58,4 +60,6 @@ public interface TbReceiptsMapper
      * @return 结果
      */
     public int deleteTbReceiptsByIds(String[] ids);
+
+    public List<TbReceipts> selectTbReceiptByReceiptNo(@Param("receiptNo") String receiptNo);
 }

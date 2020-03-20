@@ -151,6 +151,7 @@ public class TbPrintTemplateController extends BaseController
      * @param orderType 单据类别：对应模板类别：预订、认购等
      */
     @GetMapping("/print/{id}/{tempId}/{orderType}")
+    @Log(title="执行打印", businessType = BusinessType.PRINT)
     public String print(@PathVariable("id") Long id, @PathVariable("tempId") String tempId, @PathVariable("orderType") String orderType, ModelMap mmap)
     {
         String projectId = "";

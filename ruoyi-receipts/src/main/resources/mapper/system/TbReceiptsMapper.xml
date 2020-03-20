@@ -41,6 +41,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectTbReceiptsVo"/>
         where id = #{id}
     </select>
+
+    <select id="selectTbReceiptByReceiptNo" parameterType="String" resultMap="TbReceiptsResult">
+        <include refid="selectTbReceiptsVo"/>
+        where receipt_no like concat('', #{receiptNo}, '%') order by receipt_no desc
+    </select>
         
     <insert id="insertTbReceipts" parameterType="TbReceipts">
         insert into tb_receipts

@@ -58,6 +58,11 @@ public enum BusinessType
     CLEAN,
 
     /**
+     * 打印
+     */
+    PRINT,
+
+    /**
      * 数据库备份
      */
     DB_BACKUP,
