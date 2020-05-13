@@ -169,12 +169,50 @@ public class TbPrintTemplateController extends BaseController
                 return prefix + "/printTempSel";
             }else if(list.size()==1){
                 //直接到打印预览界面
-                mmap.put("tbPrintTemplate", list.get(0));
+                TbPrintTemplate tbPrintTemplate = list.get(0);
+                StringBuffer sf = new StringBuffer();
+                if("02".equals(tbPrintTemplate.getPrintMode())){//套打
+                    List<TbPrintTemplateContent> contentList = contentService.selectTbPrintTemplateContentListByTempId(tbPrintTemplate.getId());
+                    for(int i=0;i<contentList.size();i++){
+                        TbPrintTemplateContent content = contentList.get(i);
+                        String content_str = content.getContent();
+                        if(i>0){
+                            content_str = content_str.substring(content_str.indexOf("LODOP.ADD_PRINT"), content_str.length());
+                        }
+                        if(i==contentList.size()-1){
+                            sf.append(content_str);
+                        }else{
+                            sf.append(content_str).append("LODOP.NewPage();");
+                        }
+                    }
+                }else {
+                    sf.append(tbPrintTemplate.getContent());
+                }
+                tbPrintTemplate.setContent(receiptsService.initPrintData(sf.toString(), id.toString()));
+                mmap.put("tbPrintTemplate", tbPrintTemplate);
                 return prefix + "/printview";
             }
         }else {
             TbPrintTemplate tbPrintTemplate = tbPrintTemplateService.selectTbPrintTemplateById(Integer.parseInt(tempId));
-            tbPrintTemplate.setContent(receiptsService.initPrintData(tbPrintTemplate.getContent(), id.toString()));
+            StringBuffer sf = new StringBuffer();
+            if("02".equals(tbPrintTemplate.getPrintMode())){//套打
+                List<TbPrintTemplateContent> contentList = contentService.selectTbPrintTemplateContentListByTempId(tbPrintTemplate.getId());
+                for(int i=0;i<contentList.size();i++){
+                    TbPrintTemplateContent content = contentList.get(i);
+                    String content_str = content.getContent();
+                    if(i>0){
+                        content_str = content_str.substring(content_str.indexOf("LODOP.ADD_PRINT"), content_str.length());
+                    }
+                    if(i==contentList.size()-1){
+                        sf.append(content_str);
+                    }else{
+                        sf.append(content_str).append("LODOP.NewPage();");
+                    }
+                }
+            }else {
+                sf.append(tbPrintTemplate.getContent());
+            }
+            tbPrintTemplate.setContent(receiptsService.initPrintData(sf.toString(), id.toString()));
             mmap.put("tbPrintTemplate", tbPrintTemplate);
             return prefix + "/printview";
         }

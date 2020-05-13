@@ -40,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectTbPrintTemplateListByType" parameterType="String" resultMap="TbPrintTemplateResult">
         <include refid="selectTbPrintTemplateVo"/>
-        where type = #{orderType}
+        where type = #{orderType} AND state = 0
         <if test="projectId != null  and projectId != ''"> and projectId = #{projectId}</if>
     </select>
         

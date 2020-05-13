@@ -24,6 +24,7 @@
             var search = $.table.queryParams(params);
             search.projectId = $("#projectId").val();
             search.type = $("#orderType").val();
+            search.state = 0;
             return search;
         };
         $(function() {

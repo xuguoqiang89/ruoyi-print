@@ -7,7 +7,7 @@
 <div class="container-div" id="show_content">
 
 </div>
-<input id="print_type" th:value="${tbPrintTemplate.type}" type="hidden"/>
+<input id="print_type" th:value="${tbPrintTemplate.printMode}" type="hidden"/>
 <div id="print_data" style="display: none;"></div>
 <div id="template_content" th:value="${tbPrintTemplate.content}"></div>
 <th:block th:include="include :: footer" />
@@ -29,7 +29,7 @@
         LODOP = getLodop();//1. 获取 LODOP
         if(print_mode=='02'){
             //套打
-            eval(document.getElementById("show_content").innerHTML);
+            eval($("#show_content").html());
         }else {
             //空白纸
             var strBodyStyle="";
