@@ -3,6 +3,7 @@
 <head>
     <th:block th:include="include :: header('新增打印模板')" />
     <th:block th:include="include :: summernote-css" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
 </head>
 <body class="white-bg">
     <div class="wrapper wrapper-content animated fadeInRight ibox-content" style="width: 60%;float: left;">
@@ -24,6 +25,7 @@
                             <select name="printMode" class="form-control m-b" id="printMode">
                                 <option value="01">空白纸打印</option>
                                 <option value="02">套打</option>
+                                <option value="03">PDF模板打印</option>
                             </select>
                         </div>
                     </div>
@@ -73,7 +75,7 @@
             </tr>
             <tr>
                 <td>
-                    <div class="form-group" name="print_taoda" style="display: none;">
+                    <div class="form-group" id="print_taoda" name="print_taoda" style="display: none;">
                         <label class="col-sm-2 control-label">模板类别</label>
                         <div class="col-sm-10">
                             <textarea type="text" id="content1" name="taoda_content" class="form-control" placeholder="模板内容" rows="10"></textarea>
@@ -86,6 +88,16 @@
                     </div>
                 </td>
             </tr>
+                <tr>
+                    <td>
+                        <div class="form-group" id="print_pdf" style="display: none;">
+                            <label class="col-sm-2 control-label">上传模板</label>
+                            <div class="col-sm-10">
+                                <input id="picUrl" name="picUrl" type="file">
+                            </div>
+                        </div>
+                    </td>
+                </tr>
             </table>
             <input id="projectId" name="projectId" class="form-control" type="hidden" value="0" autocomplete="off">
             <input id="contentStrList" name="contentStrList" class="form-control" type="hidden" autocomplete="off">
@@ -97,6 +109,7 @@
     <th:block th:include="include :: footer" />
     <th:block th:include="include :: summernote-js" />
     <th:block th:include="include :: lodopFuncs-js" />
+    <th:block th:include="include :: bootstrap-fileinput-js" />
     <script type="text/javascript">
         var prefix = ctx + "system/print"
         $("#form-template-add").validate({
@@ -174,6 +187,17 @@
             }
         });
 
+        $(document).ready(function () {
+            $("#picUrl").fileinput({
+                'theme': 'explorer-fas',
+                'uploadUrl': ctx +'system/fileupload/upload',
+                overwriteInitial: false,
+                maxFileCount:1,
+                allowedFileExtensions: ['pdf'],
+                initialPreviewAsData: true
+            });
+        });
+
         var content_index = 0;
 //        var uEditor = UE.getEditor('editor');
 
@@ -241,6 +265,11 @@
                 for(var i=0;i<tds.length;i++){
                     tds[i].style.display = "";
                 }
+            }else if(printMode=='03'){
+                //PDF模板打印
+                document.getElementById("print_kbz").style.display = "none";
+                document.getElementById("print_taoda").style.display = "none";
+                document.getElementById("print_pdf").style.display = "";
             }
         });
 

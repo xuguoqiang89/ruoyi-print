@@ -26,6 +26,7 @@
                             <select name="printMode" class="form-control m-b" id="printMode">
                                 <option value="01" th:field="*{printMode}">空白纸打印</option>
                                 <option value="02" th:field="*{printMode}">套打</option>
+                                <option value="03" th:field="*{printMode}">PDF模板打印</option>
                             </select>
                         </div>
                     </div>
@@ -75,7 +76,7 @@
 
             <tr th:each="cc,index : *{contentList}">
                 <td>
-                    <div class="form-group" name="print_taoda">
+                    <div class="form-group" name="print_taoda" id="print_taoda">
                         <label class="col-sm-2 control-label">模板内容</label>
                         <div class="col-sm-10">
                             <textarea type="text" id="content" name="taoda_content" th:text="${cc.content}" th:value="${index.index+1}" class="form-control" placeholder="模板内容" rows="10"></textarea>
@@ -84,6 +85,17 @@
                                 <button class="btn btn-success btn-xs" type="button" onclick="preview1(this);" th:value="${index.index+1}">模板预览</button>
                                 <button class="btn btn-warning btn-xs" type="button" onclick="addNextPage();">添加下一页</button>
                             </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <div class="form-group" id="print_pdf" style="display: none;">
+                        <label class="col-sm-2 control-label">上传模板</label>
+                        <div class="col-sm-10">
+                            <input id="picUrl" name="picUrl" type="file">
                         </div>
                     </div>
                 </td>
@@ -121,6 +133,7 @@
                     contentArray.push(content1);
                 }
             }
+
             if(printMode=="02" && contentArray.length==0){
                 $.modal.alertWarning("请进行打印模板设计");
                 return false;
@@ -187,6 +200,15 @@
             var index = obj.getAttribute("value");
             obj.setAttribute("id","content"+index);
         }
+
+        $("#picUrl").fileinput({
+            'theme': 'explorer-fas',
+            'uploadUrl': ctx +'system/fileupload/upload',
+            overwriteInitial: false,
+            maxFileCount:1,
+            allowedFileExtensions: ['pdf'],
+            initialPreviewAsData: true
+        });
     });
 
 
@@ -259,6 +281,11 @@
             if(tds.length==0){
                 initTaoDaPage();
             }
+        }else if(printMode=='03'){
+            //PDF模板打印
+            document.getElementById("print_kbz").style.display = "none";
+            document.getElementById("print_taoda").style.display = "none";
+            document.getElementById("print_pdf").style.display = "";
         }
     });
 
@@ -330,6 +357,22 @@
                 '		</div>';
         td.innerHTML = td_html;
     }
+
+    //fileuploaded此事件仅针对ajax上传触发，并在每个缩略图文件上传完成后触发。此事件仅针对ajax上传并在以下情况下触发：当点击每个预览缩略图中的上传图标并且文件上传成功时，或者当你有 uploadAsync设置为true您已触发批量上传。在这种情况下，fileuploaded每一个人选择的文件被上传成功后，触发事件。
+    $('#picUrl').on('fileuploaded', function(event, data, previewId, index) {
+        if(data.response.code=='0'){
+            var res = JSON.parse(data.response.msg);
+            var filepath = $("#picUrl").attr("filePath");
+            if($.common.isEmpty(filepath)){
+                filepath = res.file_path;
+            }else {
+                filepath += ","+ res.file_path;
+            }
+            $("#picUrl").attr("filePath", filepath);
+        }else{
+            $.modal.alertError("上传附件失败");
+        }
+    });
 </script>
 </body>
 </html>
