@@ -13,18 +13,27 @@
 <th:block th:include="include :: footer" />
 <th:block th:include="include :: lodopFuncs-js" />
 <script th:inline="javascript">
+    var print_mode = $("#print_type").val();
     $(function(){
-        var content = $("#template_content").attr("value");
-        $("#show_content").html(content);
-
-        setTimeout(function(){
-            preview();
+        if(print_mode=='03'){
+            //PDF打印
+            var pdfurl = $("#template_content").attr("value");
+//                PDFObject.embed("http://localhost:8080/profile/upload/2020/06/17/11-2-1c46aeda75a18ad185f0b9867fbb1d48.pdf", "#show_content");
+                window.open(pdfurl);
             $.modal.close();//自动关闭窗体
-        }, 500);
+        }else{
+            var content = $("#template_content").attr("value");
+            $("#show_content").html(content);
+
+            setTimeout(function(){
+                preview();
+                $.modal.close();//自动关闭窗体
+            }, 500);
+        }
+
     });
 
     var LODOP; //0.声明为全局变量
-    var print_mode = $("#print_type").val();
     function CreatePrintPage() {
         LODOP = getLodop();//1. 获取 LODOP
         if(print_mode=='02'){

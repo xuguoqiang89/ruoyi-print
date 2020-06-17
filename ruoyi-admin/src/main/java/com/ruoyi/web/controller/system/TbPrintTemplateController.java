@@ -24,6 +24,8 @@ import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.utils.poi.ExcelUtil;
 import com.ruoyi.common.core.page.TableDataInfo;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 打印模板Controller
  * 
@@ -152,12 +154,15 @@ public class TbPrintTemplateController extends BaseController
      */
     @GetMapping("/print/{id}/{tempId}/{orderType}")
     @Log(title="执行打印", businessType = BusinessType.PRINT)
-    public String print(@PathVariable("id") Long id, @PathVariable("tempId") String tempId, @PathVariable("orderType") String orderType, ModelMap mmap)
+    public String print(HttpServletRequest request, @PathVariable("id") Long id, @PathVariable("tempId") String tempId, @PathVariable("orderType") String orderType, ModelMap mmap)
     {
         String projectId = "";
         mmap.put("projectId", projectId);
         mmap.put("orderType", orderType);
         mmap.put("id", id);
+        String req_url = request.getRequestURL().toString();
+        String req_uri = request.getRequestURI();
+        req_url = req_url.substring(0, req_url.indexOf(req_uri));
         if(StringUtils.isEmpty(tempId) || "0".equals(tempId)){
             List<TbPrintTemplate> list = tbPrintTemplateService.selectTbPrintTemplateListByType(orderType, projectId);
             if(list.size()==0){
@@ -185,10 +190,16 @@ public class TbPrintTemplateController extends BaseController
                             sf.append(content_str).append("LODOP.NewPage();");
                         }
                     }
-                }else {
+                    tbPrintTemplate.setContent(receiptsService.initPrintData(sf.toString(), id.toString()));
+                }else if("03".equals(tbPrintTemplate.getPrintMode())){
+                    //PDF套打：生成带数据的文件，并将路径返回
+                    String pdfUrl = receiptsService.initPdfPrintData(id.toString(), tbPrintTemplate.getType(), tbPrintTemplate.getContent());
+                    tbPrintTemplate.setContent(req_url+pdfUrl);
+                }else{
+                    //空白纸打印
                     sf.append(tbPrintTemplate.getContent());
+                    tbPrintTemplate.setContent(receiptsService.initPrintData(sf.toString(), id.toString()));
                 }
-                tbPrintTemplate.setContent(receiptsService.initPrintData(sf.toString(), id.toString()));
                 mmap.put("tbPrintTemplate", tbPrintTemplate);
                 return prefix + "/printview";
             }
@@ -209,10 +220,16 @@ public class TbPrintTemplateController extends BaseController
                         sf.append(content_str).append("LODOP.NewPage();");
                     }
                 }
-            }else {
+                tbPrintTemplate.setContent(receiptsService.initPrintData(sf.toString(), id.toString()));
+            }else if("03".equals(tbPrintTemplate.getPrintMode())){
+                //PDF套打：生成带数据的文件，并将路径返回
+                String pdfUrl = receiptsService.initPdfPrintData(id.toString(), tbPrintTemplate.getType(), tbPrintTemplate.getContent());
+                tbPrintTemplate.setContent(req_url+pdfUrl);
+            }else{
+                //空白纸打印
                 sf.append(tbPrintTemplate.getContent());
+                tbPrintTemplate.setContent(receiptsService.initPrintData(sf.toString(), id.toString()));
             }
-            tbPrintTemplate.setContent(receiptsService.initPrintData(sf.toString(), id.toString()));
             mmap.put("tbPrintTemplate", tbPrintTemplate);
             return prefix + "/printview";
         }

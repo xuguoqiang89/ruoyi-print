@@ -2,6 +2,7 @@ package com.ruoyi.system.service;
 
 import com.ruoyi.system.domain.TbReceipts;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 收据管理Service接口
@@ -60,4 +61,8 @@ public interface ITbReceiptsService
     public int deleteTbReceiptsById(Long id);
 
     public String initPrintData(String tempContent, String receiptId);
+
+    public Map<String, Object> getPrintDataMap(String receiptId);
+
+    String initPdfPrintData(String receiptId, String type, String pdfTemplatePath);
 }

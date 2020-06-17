@@ -3,6 +3,7 @@
 <head>
     <th:block th:include="include :: header('修改打印模板')" />
     <th:block th:include="include :: summernote-css" />
+    <th:block th:include="include :: bootstrap-fileinput-css" />
 </head>
 <body class="white-bg">
 <body class="white-bg">
@@ -103,6 +104,7 @@
         </table>
         <input id="projectId" name="projectId" class="form-control" type="hidden" value="0" autocomplete="off">
         <input id="contentStrList" name="contentStrList" class="form-control" type="hidden" autocomplete="off">
+        <input id="picUrlValue" name="picUrlValue" class="form-control" type="hidden" th:value="*{content}" autocomplete="off">
     </form>
 </div>
 <div id="print_data" style="float:right; width: 28%;height: 96%;margin-top: 10px;">
@@ -111,6 +113,7 @@
 <th:block th:include="include :: footer" />
 <th:block th:include="include :: summernote-js" />
 <th:block th:include="include :: lodopFuncs-js" />
+<th:block th:include="include :: bootstrap-fileinput-js" />
 <script type="text/javascript">
     var prefix = ctx + "system/print"
     $("#form-template-add").validate({
@@ -148,6 +151,10 @@
                 contentArray = [];
             }
             var dataArray = new Array();
+            if(printMode=='03'){
+                //PDF模板打印
+                content = $("#picUrl").attr("filePath");
+            }
 
             var params="{id:'"+id+"',content:'"+(content)+"',projectId:'"+projectId+"',remark:'"+remark+"',printMode:'"+printMode+"',printType:'"+printType+"',state:'"+state+"'}";
             dataArray.push(params);
@@ -191,6 +198,8 @@
         var printMode = $("#printMode").val();
         if(printMode=='01'){
             document.getElementById("print_kbz").style.display = "block";
+        }else if(printMode=='03'){
+            document.getElementById("print_pdf").style.display = "block";
         }
         $('#editor').summernote('code', content);
 
@@ -201,13 +210,20 @@
             obj.setAttribute("id","content"+index);
         }
 
+        var filePath = $("#picUrlValue").val();
         $("#picUrl").fileinput({
             'theme': 'explorer-fas',
             'uploadUrl': ctx +'system/fileupload/upload',
             overwriteInitial: false,
             maxFileCount:1,
             allowedFileExtensions: ['pdf'],
-            initialPreviewAsData: true
+            allowedPreviewTypes: ['pdf'],
+            previewFileIcon: "<i class='glyphicon glyphicon-king'></i>",
+            initialPreviewAsData: true,
+            initialPreviewFileType:'pdf',
+            initialPreview: [  //初始化回显
+                filePath
+            ]
         });
     });
 
@@ -263,9 +279,14 @@
 
     $("#printMode").change(function(res){
         var printMode = $("#printMode").val();
+        var div_kbz = document.getElementById("print_kbz");
+        var div_taoda =document.getElementById("print_taoda");
+        var div_pdf =document.getElementById("print_pdf");
+
         if(printMode=='01'){
             //空白纸
-            document.getElementById("print_kbz").style.display = "";
+            div_kbz.style.display = "";
+            div_pdf.style.display = "none";
             var tds = document.getElementsByName("print_taoda");
             for(var i=0;i<tds.length;i++){
                 tds[i].style.display = "none";
@@ -273,7 +294,9 @@
 
         }else if(printMode=='02'){
             //套打
-            document.getElementById("print_kbz").style.display = "none";
+            div_kbz.style.display = "none";
+            div_pdf.style.display = "none";
+
             var tds = document.getElementsByName("print_taoda");
             for(var i=0;i<tds.length;i++){
                 tds[i].style.display = "";
@@ -283,8 +306,14 @@
             }
         }else if(printMode=='03'){
             //PDF模板打印
-            document.getElementById("print_kbz").style.display = "none";
-            document.getElementById("print_taoda").style.display = "none";
+
+            if(div_kbz!=null){
+                div_kbz.style.display = "none";
+            }
+            if(div_taoda!=null){
+                div_taoda.style.display = "none";
+            }
+
             document.getElementById("print_pdf").style.display = "";
         }
     });

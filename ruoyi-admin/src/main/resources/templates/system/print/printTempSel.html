@@ -85,7 +85,9 @@
                         var res = '';
                         if(value=='01'){
                             res = '<span class="label label-success">空白纸</span>';
-                        }else {
+                        }else if(value=='03'){
+                            res = '<span class="label label-danger">PDF模板</span>';
+                        }else if(value=='02'){
                             res = '<span class="label label-warning">套打</span>';
                         }
                         return res;

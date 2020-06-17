@@ -1,9 +1,15 @@
 package com.ruoyi.system.service.impl;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import com.ruoyi.common.config.Global;
 import com.ruoyi.common.utils.DateFormatUtil;
 import com.ruoyi.common.utils.NumberFormatUtil;
+import com.ruoyi.common.utils.PdfUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.ehcache.util.EhCacheUtils;
 import com.ruoyi.framework.util.ShiroUtils;
@@ -113,20 +119,64 @@ public class TbReceiptsServiceImpl implements ITbReceiptsService
     @Override
     public String initPrintData(String tempContent, String receiptId) {
         TbReceipts receipts = tbReceiptsMapper.selectTbReceiptsById(Long.parseLong(receiptId));
+        Map<String, Object> map = this.getPrintDataMap(receiptId);
+
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            tempContent = tempContent.replace(entry.getKey(),entry.getValue()==null?"":entry.getValue().toString());
+        }
+        return tempContent;
+    }
+
+    @Override
+    public Map<String, Object> getPrintDataMap(String receiptId) {
+        Map<String, Object> map = new HashMap<>();
+        TbReceipts receipts = tbReceiptsMapper.selectTbReceiptsById(Long.parseLong(receiptId));
         String operator = (String) EhCacheUtils.getUserInfo(receipts.getOperator());
         String receiptMode = (String) EhCacheUtils.getDictInfo("receipt_type", receipts.getReceiptMode());//收款方式
         String remarkType = (String) EhCacheUtils.getDictInfo("receipt_remark_type", receipts.getRemarkType());//备注事项
-        tempContent = tempContent.replace("${companyName}",receipts.getCompanyName());
-        tempContent = tempContent.replace("${receiptNo}", StringUtils.isEmpty(receipts.getReceiptNo())?"":receipts.getReceiptNo());
-        tempContent = tempContent.replace("${rmb}", NumberFormatUtil.format2(receipts.getReceiptRmb()));
-        tempContent = tempContent.replace("${rmbUpper}", receipts.getReceiptRmbUpp());
-        tempContent = tempContent.replace("${remarkType}", remarkType);
-        tempContent = tempContent.replace("${remark}", receipts.getRemark());
-        tempContent = tempContent.replace("${receiptMode}", receiptMode);
-        tempContent = tempContent.replace("${operator}", operator);
-        tempContent = tempContent.replace("${cashier}", StringUtils.isEmpty(receipts.getCashier())?"":receipts.getCashier());
-        tempContent = tempContent.replace("${receiptDate}", DateFormatUtil.format(receipts.getReceiptDate(), DateFormatUtil.FORMAT_DATE_STR));
-        return tempContent;
+        map.put("${companyName}",receipts.getCompanyName());
+        map.put("${receiptNo}", StringUtils.isEmpty(receipts.getReceiptNo())?"":receipts.getReceiptNo());
+        map.put("${rmb}", NumberFormatUtil.format2(receipts.getReceiptRmb()));
+        map.put("${rmbUpper}", receipts.getReceiptRmbUpp());
+        map.put("${remarkType}", remarkType);
+        map.put("${remark}", receipts.getRemark());
+        map.put("${receiptMode}", receiptMode);
+        map.put("${operator}", operator);
+        map.put("${cashier}", StringUtils.isEmpty(receipts.getCashier())?"":receipts.getCashier());
+        map.put("${receiptDate}", DateFormatUtil.format(receipts.getReceiptDate(), DateFormatUtil.FORMAT_DATE_STR));
+        return map;
+    }
+
+    /**
+     * 返回生成的附件
+     * @param receiptId
+     * @param type
+     * @param pdfTemplatePath
+     * @return /profile/upload/2020/
+     */
+    @Override
+    public String initPdfPrintData(String receiptId, String type, String pdfTemplatePath) {
+        Map<String, Object> dataMap = this.getPrintDataMap(receiptId);
+        Map<String, Object> map = new HashMap<>();
+        map.put("datamap", dataMap);
+
+        String filePath = Global.getUploadPath();
+
+        pdfTemplatePath = pdfTemplatePath.replace("/profile/upload", filePath);
+
+        File tempFile = new File(pdfTemplatePath);
+
+        String outName = type+"-"+receiptId+"-"+tempFile.getName();//03-11-*******.pdf
+        String outPath = tempFile.getParent()+"/"+outName;//C:/ruoyi/uploadPath/upload/2020/06/17/******.pdf
+
+        PdfUtils.pdfout(pdfTemplatePath, outPath, map, "C:\\Windows\\Fonts\\msyh.ttf");
+
+        File outFile = new File(outPath);
+        String out_path = outFile.getParent();
+        String url = out_path.substring(out_path.indexOf("upload\\")+6, out_path.length());
+        url = "/profile/upload"+url+"/"+outName;
+        url = url.replaceAll("\\\\","/");
+        return url;
     }
 
     /**

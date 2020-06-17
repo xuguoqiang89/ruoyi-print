@@ -147,6 +147,11 @@
                 }
                 var dataArray = new Array();
 
+                if(printMode=='03'){
+                    //PDF模板打印
+                    content = $("#picUrl").attr("filePath");
+                }
+
                 var params="{id:'"+id+"',content:'"+(content)+"',projectId:'"+projectId+"',remark:'"+remark+"',printMode:'"+printMode+"',printType:'"+printType+"',state:'"+state+"'}";
                 dataArray.push(params);
                 dataArray.push(contentArray);
@@ -157,9 +162,7 @@
                     contentType: "application/json;charset=UTF-8",
                     data: JSON.stringify(dataArray),
                     success: function(r){
-                        console.log(r);
                         if(r.code == 0){
-                            console.log(1);
                             parent.location.href= prefix;
                         }else{
                             layer.alert(content, {
@@ -188,6 +191,7 @@
         });
 
         $(document).ready(function () {
+//            jQuery.noConflict();
             $("#picUrl").fileinput({
                 'theme': 'explorer-fas',
                 'uploadUrl': ctx +'system/fileupload/upload',
@@ -196,6 +200,22 @@
                 allowedFileExtensions: ['pdf'],
                 initialPreviewAsData: true
             });
+        });
+
+        //fileuploaded此事件仅针对ajax上传触发，并在每个缩略图文件上传完成后触发。此事件仅针对ajax上传并在以下情况下触发：当点击每个预览缩略图中的上传图标并且文件上传成功时，或者当你有 uploadAsync设置为true您已触发批量上传。在这种情况下，fileuploaded每一个人选择的文件被上传成功后，触发事件。
+        $('#picUrl').on('fileuploaded', function(event, data, previewId, index) {
+            if(data.response.code=='0'){
+                var res = JSON.parse(data.response.msg);
+                var filepath = $("#picUrl").attr("filePath");
+                if($.common.isEmpty(filepath)){
+                    filepath = res.file_path;
+                }else {
+                    filepath += ","+ res.file_path;
+                }
+                $("#picUrl").attr("filePath", filepath);
+            }else{
+                $.modal.alertError("上传附件失败");
+            }
         });
 
         var content_index = 0;

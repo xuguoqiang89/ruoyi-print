@@ -93,7 +93,7 @@ public class TbPrintTemplateServiceImpl implements ITbPrintTemplateService
             tbPrintTemplate.setState(paramObj.getString("state"));
             tbPrintTemplate.setProjectId(StringUtils.isNull(paramObj.getString("projectId"))?0:paramObj.getLong("projectId"));
             tbPrintTemplate.setRemark(paramObj.getString("remark"));
-            if("1".equals(paramObj.getString("printMode"))){
+            if("01".equals(paramObj.getString("printMode")) || "03".equals(paramObj.getString("printMode"))){
                 //空白纸打印
                 tbPrintTemplate.setContent(paramObj.getString("content"));
             }else {
@@ -105,11 +105,18 @@ public class TbPrintTemplateServiceImpl implements ITbPrintTemplateService
         }else {
             TbPrintTemplate tbPrintTemplate = tbPrintTemplateMapper.selectTbPrintTemplateById(paramObj.getInteger("id"));
             tbPrintTemplate.setUpdateTime(new Date());
-            tbPrintTemplate.setContent(paramObj.getString("content"));
+//            tbPrintTemplate.setContent(paramObj.getString("content"));
             tbPrintTemplate.setPrintMode(paramObj.getString("printMode"));
             tbPrintTemplate.setType(paramObj.getString("printType"));
             tbPrintTemplate.setState(paramObj.getString("state"));
             tbPrintTemplate.setRemark(paramObj.getString("remark"));
+
+            if("01".equals(paramObj.getString("printMode")) || "03".equals(paramObj.getString("printMode"))){
+                //空白纸打印
+                tbPrintTemplate.setContent(paramObj.getString("content"));
+            }else {
+                tbPrintTemplate.setContent("");
+            }
             rows = tbPrintTemplateMapper.updateTbPrintTemplate(tbPrintTemplate);
 
             //子表 先删除在新增
